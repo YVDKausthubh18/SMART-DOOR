@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Calling Bell</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        #video {
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid #000;
+            border-radius: 10px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #capturedImage {
+            display: none;
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid #000;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Automated Calling Bell with Camera</h1>
+    <video id="video" autoplay></video>
+    <button onclick="capturePhoto()">Capture Photo</button>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <img id="capturedImage" alt="Captured Photo">
+
+    <script>
+        // Access the camera
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const capturedImage = document.getElementById('capturedImage');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => console.error("Error accessing camera: ", err));
+
+        function capturePhoto() {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageUrl = canvas.toDataURL('image/png');
+
+            // Display captured image
+            capturedImage.src = imageUrl;
+            capturedImage.style.display = 'block';
+
+            // Send image to backend (Needs API)
+            sendPhoto(imageUrl);
+        }
+
+        function sendPhoto(imageUrl) {
+            fetch('https://your-backend-api.com/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageUrl })
+            })
+            .then(response => response.json())
+            .then(data => alert("Photo sent to admin successfully!"))
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+</body>
+</html>
